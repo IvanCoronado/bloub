@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import AgentAvatar from './AgentAvatar.vue'
 import Icon from './StudioIcon.vue'
 import ExportDialog from './ExportDialog.vue'
@@ -11,6 +11,8 @@ const { project, selected, config, time, playing, sequencing, duration, scene, d
 const tab = ref<'design' | 'animation' | 'integration'>('design')
 const propertyTab = ref<'appearance' | 'accessories'>('appearance')
 const exporting = ref(false)
+const presenting = ref(false)
+const AgentPresentation = defineAsyncComponent(() => import('./presentation/AgentPresentation.vue'))
 const grid = ref(true)
 const dark = ref(false)
 const team = ref(false)
@@ -49,7 +51,7 @@ function sceneDuration(index: number, event: Event) {
     </aside>
 
     <div class="studio-body">
-      <header class="studio-topbar"><div class="breadcrumb">Workspace<Icon name="chevron" :size="13" /><span>{{ tab === 'design' ? 'Mis agentes' : tab === 'animation' ? 'Animaciones' : 'Integración' }}</span></div><div class="topbar-actions"><span class="save-status"><span :class="{ unsaved: dirty }"></span>{{ dirty ? 'Cambios sin guardar' : 'Proyecto local' }}</span><button class="button save-button" @click="save"><Icon :name="dirty ? 'save' : 'check'" :size="16" />Guardar</button><button class="button primary" @click="playing = false; exporting = true"><Icon name="download" :size="16" />Exportar<Icon name="down" :size="13" /></button></div></header>
+      <header class="studio-topbar"><div class="breadcrumb">Workspace<Icon name="chevron" :size="13" /><span>{{ tab === 'design' ? 'Mis agentes' : tab === 'animation' ? 'Animaciones' : 'Integración' }}</span></div><div class="topbar-actions"><span class="save-status"><span :class="{ unsaved: dirty }"></span>{{ dirty ? 'Cambios sin guardar' : 'Proyecto local' }}</span><button class="button presentation-entry" @click="playing = false; presenting = true"><Icon name="play" :size="15" />Presentar equipo</button><button class="button save-button" @click="save"><Icon :name="dirty ? 'save' : 'check'" :size="16" />Guardar</button><button class="button primary" @click="playing = false; exporting = true"><Icon name="download" :size="16" />Exportar<Icon name="down" :size="13" /></button></div></header>
 
       <main class="studio-main">
         <div class="page-heading"><div><div class="eyebrow"><span></span>PERSONALIDAD, PÍXEL A PÍXEL</div><h1>{{ tab === 'integration' ? 'Listos para formar parte.' : 'El equipo cobra vida.' }}</h1><p>Diseña, combina y anima a los agentes de Qamarero.</p></div><button class="text-button import-project" @click="inputFile?.click()"><Icon name="upload" :size="16" />Importar proyecto</button><input ref="inputFile" class="visually-hidden" type="file" accept=".json,application/json" aria-label="Importar proyecto JSON" @change="event => { importFile((event.target as HTMLInputElement).files?.[0]); (event.target as HTMLInputElement).value = '' }" /></div>
@@ -96,5 +98,6 @@ function sceneDuration(index: number, event: Event) {
     </div>
     <div v-if="message" class="studio-toast" role="status"><Icon name="sparkles" :size="17" />{{ message }}<button class="icon-button" aria-label="Cerrar aviso" @click="message = ''"><Icon name="close" :size="14" /></button></div>
     <ExportDialog v-if="exporting" :config="config" :state="scene.state" :time="scene.time" :timeline="sequencing ? project.timeline : undefined" @close="exporting = false" @done="notify" />
+    <AgentPresentation v-if="presenting" embedded @close="presenting = false" />
   </div>
 </template>

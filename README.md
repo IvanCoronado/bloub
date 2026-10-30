@@ -14,6 +14,8 @@ pnpm build
 pnpm generate:agents  # rebuild public/agents
 ```
 
+[30-second team presentation](public/presentations/equipo-qamarero.mp4) · [Presentation source and storyboard](docs/presentation.md).
+
 [Integration guide](docs/qamarero-studio.md) · [Verification](docs/qa-agent-studio.md) · [Ready-to-use assets](public/agents).
 
 The characters are visual components: your application supplies agent behavior and state changes. The original editor remains at `/#original` after reloading that URL. Upstream code, measurements and MIT attribution are preserved.
