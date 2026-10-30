@@ -1,9 +1,9 @@
 import { BotEngine } from '@/bot/engine'
 import { EXPRESSION_BY_ID, type ExpressionId } from '@/bot/expressions'
-import { blinkScale, liveliness } from '@/bot/face'
 import { profileFromPolygon, regularPolygonProfile, superellipseProfile, unionOfCirclesProfile, radiusAtAngle } from '@/bot/shape'
 import { mixHex } from '@/bot/skins'
 import type { AgentConfig, BodyShape, Motion } from './catalog'
+import { glassesLayout } from './glasses'
 
 export const AGENT_VIEWBOX = '-180 -180 360 360'
 const profiles: Record<BodyShape, number[]> = {
@@ -22,18 +22,20 @@ const n = (v: number) => +v.toFixed(4)
 
 function engineFor(config: AgentConfig, state: Motion) {
   const mood: ExpressionId = state === 'happy' ? 'heureux' : state === 'thinking' ? 'curieux' : state === 'listening' || state === 'working' ? 'attentif' : config.expression
-  const key = `${config.shape}:${mood}`
+  const glasses = config.accessories.includes('glasses')
+  const key = `${config.shape}:${mood}:${glasses}`
   let engine = engines.get(key)
   if (!engine) {
     const source = EXPRESSION_BY_ID.get(mood)!
     const expression = {
       ...source,
+      split: glasses ? Math.max(source.split, 23) : source.split,
       gaze: mood === 'neutre' ? { yaw: 2, pitch: -1, roll: -18 } : { yaw: source.gaze.yaw * 0.45, pitch: source.gaze.pitch * 0.35 - 1, roll: -18 + source.gaze.roll * 0.25 }
     }
     engine = new BotEngine(100, 'idle', profiles[config.shape], expression)
     engines.set(key, engine)
   }
-  return { engine, mood }
+  return engine
 }
 
 /** Un seul rendu pour le composant, les fichiers SVG et chaque image GIF/MP4. */
@@ -42,8 +44,7 @@ export function renderAgentSvg(config: AgentConfig, time = 0, state: Motion = 'i
   const k = config.intensity
   const wave = Math.sin(t * Math.PI * 2)
   const fast = Math.sin(t * Math.PI * 5)
-  const { engine, mood } = engineFor(config, state)
-  const frame = engine.sample(t)
+  const frame = engineFor(config, state).sample(t)
   let y = 0, rotation = config.tilt, sx = 1, sy = 1
   if (state === 'listening') { rotation += Math.sin(t * 2) * 5 * k; sy += wave * 0.018 * k }
   if (state === 'thinking') { y = Math.sin(t * 2) * 3 * k; rotation += Math.sin(t * 1.5) * 6 * k }
@@ -65,16 +66,8 @@ export function renderAgentSvg(config: AgentConfig, time = 0, state: Motion = 'i
   if (config.accessories.includes('megaphone')) front.push(`<g transform="translate(${right - 2} -13) rotate(-9) scale(${accessory})"><path d="M0 -12 L54 -32 Q60 -31 60 -24 V25 Q60 32 54 31 L0 12 Q-6 10 -6 0 Q-6 -10 0 -12Z" fill="${accent}"/><ellipse cx="57" cy="0" rx="8" ry="29" fill="${config.bodyColor}" stroke="${accent}" stroke-width="3"/><path d="M12 12 L16 32 L27 31 L25 15Z" fill="${accent}"/></g>`)
   if (config.accessories.includes('bowtie')) front.push(`<g transform="translate(0 ${bottom - 23}) scale(${accessory})"><path d="M0 0 L-22 -12 Q-29 -16 -29 -7 V9 Q-29 17 -22 13 L0 2 L22 13 Q29 17 29 9 V-7 Q29 -16 22 -12Z" fill="${accent}"/><circle r="6" cy="1" fill="${accent}"/></g>`)
   if (config.accessories.includes('glasses')) {
-    // Les montures suivent le regard, mais pas l'ecrasement des paupieres.
-    const matrices = frame.eyes.map((eye, i) => {
-      const matrix = eye.matrix.slice(7, -1).split(',').map(Number)
-      const blink = blinkScale(Math.min(liveliness(t).lid, EXPRESSION_BY_ID.get(mood)!.eyes[i]!.open))
-      matrix[1] = n(matrix[1]! / blink)
-      matrix[3] = n(matrix[3]! / blink)
-      return matrix
-    })
-    const bridge = matrices.length === 2 ? `<path d="M${n(matrices[0]![4]! + 27 * accessory)} ${matrices[0]![5]} L${n(matrices[1]![4]! - 27 * accessory)} ${matrices[1]![5]}"/>` : ''
-    front.push(`<g fill="none" stroke="${accent}" stroke-width="7">${bridge}${matrices.map(matrix => `<ellipse cx="0" cy="0" rx="31" ry="35" transform="matrix(${matrix.join(',')}) scale(${accessory})"/>`).join('')}</g>`)
+    const glasses = glassesLayout(frame.eyes, accessory)
+    if (glasses) front.push(`<g data-accessory="glasses" transform="translate(${n(glasses.x)} ${n(glasses.y)}) rotate(${n(glasses.rotation)}) scale(${accessory})" fill="none" stroke="${accent}" stroke-width="${glasses.stroke}" stroke-linecap="round"><path d="M${n(glasses.bridgeStart)} 0 Q0 -4 ${n(glasses.bridgeEnd)} 0"/><circle cx="${n(-glasses.halfSpacing)}" cy="0" r="${glasses.radius}"/><circle cx="${n(glasses.halfSpacing)}" cy="0" r="${glasses.radius}"/></g>`)
   }
   if (config.accessories.includes('chef')) front.push(`<g transform="translate(0 ${top + 10}) scale(${accessory})"><path d="M-43 0 V-31 C-70 -31 -76 -67 -54 -76 C-41 -82 -32 -77 -26 -72 C-22 -101 20 -104 29 -74 C52 -90 77 -72 70 -51 C67 -39 57 -33 44 -32 V0Z" fill="${accent}"/><path d="M-42 -8 H43" stroke="${mixHex(accent, '#000000', 0.1)}" stroke-width="3"/></g>`)
   const dots = state === 'thinking' ? [0, 1, 2].map(i => `<circle cx="${55 + i * 18}" cy="${top - 27 - Math.sin(t * 4 - i * 0.8) * 4}" r="${3.5 + k}" fill="${accent}" opacity="${n(0.4 + (Math.sin(t * 4 - i) + 1) * 0.3)}"/>`).join('') : ''

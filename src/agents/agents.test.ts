@@ -53,7 +53,7 @@ describe('shared animation renderer', () => {
     const svg = renderAgentSvg({ ...config, accessories: [...config.accessories] }, 0.5)
     expect(svg).toContain('ellipse cx="57"')
     expect(svg).toContain('L-22 -12')
-    expect(svg).toContain('rx="31"')
+    expect(svg).toContain('data-accessory="glasses"')
     expect(svg).toContain('C-70 -31')
     expect(svg).toContain('width="27"')
   })

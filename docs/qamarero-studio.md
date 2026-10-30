@@ -28,7 +28,7 @@ const state = ref<Motion>('listening')
 
 Props: `config: AgentConfig`, `state: Motion`, `size`, `playing` y `time`. Con `time`, el padre controla cada fotograma. Sin `time`, el componente usa su propio reloj. Para composiciones personalizadas, exporta el JSON, valídalo con `parseProject` y pasa el agente al componente. El ejemplo de la pestaña Integración importa ese JSON para conservar las ediciones.
 
-Para otro repositorio Vue, copia `AgentAvatar.vue`, `catalog.ts`, `render.ts` y la carpeta `src/bot/`; configura `@` para apuntar a `src`. Los SVG exportados se pueden usar directamente como imágenes, sin copiar código del motor.
+Para otro repositorio Vue, copia `AgentAvatar.vue`, `catalog.ts`, `render.ts`, `glasses.ts` y la carpeta `src/bot/`; configura `@` para apuntar a `src`. Los SVG exportados se pueden usar directamente como imágenes, sin copiar código del motor.
 
 ```ts
 import { parseProject } from './agents/catalog'
