@@ -39,7 +39,7 @@ async function run() {
 
 <template>
   <dialog ref="dialog" class="export-dialog" aria-labelledby="export-title" @cancel.prevent="close" @click="event => { if (event.target === dialog) close() }">
-    <header><div><span class="eyebrow">DEL ESTUDIO A TU PRODUCTO</span><h2 id="export-title">Dale vida fuera de aquí.</h2></div><button class="icon-button" aria-label="Cerrar exportación" @click="close"><Icon name="close" /></button></header>
+    <header><h2 id="export-title">Exportar agente</h2><button class="icon-button" aria-label="Cerrar exportación" @click="close"><Icon name="close" /></button></header>
     <div class="export-preview checker"><AgentAvatar :config="config" :state="state" :time="time" :size="200" /></div>
     <div class="format-grid"><button v-for="item in formats" :key="item.id" :class="{ active: format === item.id }" :aria-pressed="format === item.id" :disabled="busy" @click="format = item.id"><strong>{{ item.name }}</strong><small>{{ item.hint }}</small></button></div>
     <div class="export-options"><label>Resolución<select v-model="size" :disabled="busy"><option :value="256">256 × 256 px</option><option :value="512">512 × 512 px</option><option v-if="format !== 'gif'" :value="1024">1024 × 1024 px</option></select></label><label class="toggle-label"><input v-model="transparent" type="checkbox" :disabled="busy || format === 'mp4' || format === 'animated-svg'" /> Fondo transparente</label></div>

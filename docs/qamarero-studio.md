@@ -4,9 +4,9 @@ Estudio en español para componer los cinco personajes de la referencia: QPhone 
 
 ## Uso
 
-Ejecuta `pnpm install` y `pnpm dev`, y abre `http://localhost:5190`. Elige un agente, ajusta su apariencia y combina accesorios. «Crear un agente» duplica el seleccionado. «Guardar» conserva el proyecto en este navegador; «Descargar proyecto JSON» crea una copia portable e importable. No hay sincronización entre dispositivos ni backend.
+Ejecuta `pnpm install` y `pnpm dev`, y abre `http://localhost:5190`. Elige un agente en la fila superior. En Diseñar, las cuadrículas muestran las formas y las 16 expresiones; los círculos eligen el color. Accesorios y Más ajustes se despliegan debajo. «Nuevo» duplica el seleccionado. «Guardar» conserva el proyecto en este navegador; el menú de tres puntos permite importar y descargar el JSON. No hay sincronización entre dispositivos ni backend.
 
-En Animaciones puedes seleccionar reposo, escucha, pensamiento, conversación, celebración o trabajo, ajustar velocidad e intensidad y añadir estados a una secuencia. Las escenas admiten duración de 0,5–10 segundos, orden y borrado. El reproductor permite pausar, reiniciar y buscar un instante. La preferencia de movimiento reducido pausa la reproducción inicial; el usuario puede iniciarla manualmente.
+En Animar puedes seleccionar reposo, escucha, pensamiento, conversación, celebración o trabajo, ajustar velocidad e intensidad y añadir estados a una secuencia. Las escenas admiten duración de 0,5–10 segundos, orden y borrado. El reproductor permite pausar, reiniciar y buscar un instante. Elegir una expresión en Diseñar vuelve al reposo para mostrar esa cara. La preferencia de movimiento reducido pausa la reproducción inicial; el usuario puede iniciarla manualmente.
 
 La profundidad ajusta el sombreado del cuerpo. Las formas siguen siendo SVG 2D. Estos agentes son personajes visuales; la aplicación consumidora conecta los estados a herramientas, conversaciones y eventos del producto.
 

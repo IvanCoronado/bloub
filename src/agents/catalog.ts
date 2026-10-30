@@ -38,9 +38,13 @@ export const MOTIONS = [
 
 export const MOODS: { id: ExpressionId; label: string }[] = [
   { id: 'neutre', label: 'Natural' }, { id: 'attentif', label: 'Atento' },
-  { id: 'heureux', label: 'Alegre' }, { id: 'curieux', label: 'Curioso' },
-  { id: 'surpris', label: 'Sorprendido' }, { id: 'confus', label: 'Pensativo' },
-  { id: 'fier', label: 'Orgulloso' }, { id: 'somnolent', label: 'Dormilón' }
+  { id: 'surpris', label: 'Sorprendido' }, { id: 'excite', label: 'Entusiasmado' },
+  { id: 'heureux', label: 'Alegre' }, { id: 'hilare', label: 'Risueño' },
+  { id: 'colere', label: 'Enfadado' }, { id: 'triste', label: 'Triste' },
+  { id: 'effraye', label: 'Asustado' }, { id: 'mefiant', label: 'Desconfiado' },
+  { id: 'confus', label: 'Pensativo' }, { id: 'curieux', label: 'Curioso' },
+  { id: 'fier', label: 'Orgulloso' }, { id: 'timide', label: 'Tímido' },
+  { id: 'blase', label: 'Indiferente' }, { id: 'somnolent', label: 'Dormilón' }
 ]
 
 export type BodyShape = typeof BODY_SHAPES[number]['id']
