@@ -3,11 +3,12 @@ import { computed, defineAsyncComponent, ref } from 'vue'
 import AgentAvatar from './AgentAvatar.vue'
 import Icon from './StudioIcon.vue'
 import ExportDialog from './ExportDialog.vue'
-import { ACCESSORIES, BODY_SHAPES, MOODS, MOTIONS, type AgentConfig } from './catalog'
+import CollectionSwitcher from './CollectionSwitcher.vue'
+import { ACCESSORIES, CLASSIC_SHAPES, INGREDIENT_SHAPES, MOODS, MOTIONS, type AgentConfig } from './catalog'
 import { useStudio } from './useStudio'
 import { download, renderAnimatedSvg } from './export'
 
-const { project, selected, config, time, playing, sequencing, duration, scene, dirty, message, reduced, notify, patch, toggleAccessory, save, duplicate, resetAgent, setMotion, addScene, updateScene, removeScene, moveScene, seekScene, importFile } = useStudio()
+const { project, collection, switchCollection, selected, config, time, playing, sequencing, duration, scene, dirty, message, reduced, notify, patch, toggleAccessory, save, duplicate, resetAgent, setMotion, addScene, updateScene, removeScene, moveScene, seekScene, importFile } = useStudio()
 const tab = ref<'design' | 'animation' | 'integration'>('design')
 const propertyTab = ref<'appearance' | 'accessories'>('appearance')
 const exporting = ref(false)
@@ -18,13 +19,14 @@ const dark = ref(false)
 const team = ref(false)
 const zoom = ref(100)
 const inputFile = ref<HTMLInputElement>()
-const bodyColors = ['#111112', '#364152', '#735448', '#f9ede2', '#377c61', '#6250a2']
-const accentColors = ['#ff5d22', '#eab84c', '#77a985', '#7f9fd4', '#a48fc7', '#ec8ca1']
+const bodyColors = computed(() => collection.value === 'ingredients' ? ['#efa53a', '#ff6036', '#fff4dc', '#ffd138', '#ff5135', '#73a26b'] : ['#111112', '#364152', '#735448', '#f9ede2', '#377c61', '#6250a2'])
+const accentColors = computed(() => collection.value === 'ingredients' ? ['#19262e', '#ff5d22', '#397950', '#7f9fd4', '#a48fc7', '#ec8ca1'] : ['#ff5d22', '#eab84c', '#77a985', '#7f9fd4', '#a48fc7', '#ec8ca1'])
+const shapes = computed(() => collection.value === 'ingredients' ? INGREDIENT_SHAPES : CLASSIC_SHAPES)
 const currentMotion = computed(() => MOTIONS.find(m => m.id === scene.value.state)!)
 const timelineDuration = computed(() => project.value.timeline.reduce((sum, block) => sum + block.duration, 0))
-const integrationCode = computed(() => `<script setup lang="ts">\nimport AgentAvatar from './agents/AgentAvatar.vue'\nimport { parseProject } from './agents/catalog'\nimport json from './qamarero-agents.json'\n\nconst project = parseProject(json)\nconst agent = project.agents.find(\n  a => a.id === '${config.value.id}'\n)!\n<\/script>\n\n<template>\n  <AgentAvatar\n    :config="agent"\n    state="${scene.value.state}"\n    :size="160"\n    :playing="true"\n  />\n</template>`)
+const integrationCode = computed(() => `<script setup lang="ts">\nimport AgentAvatar from './agents/AgentAvatar.vue'\nimport { parseProject } from './agents/catalog'\nimport json from './${collection.value === 'ingredients' ? 'qamarero-ingredients' : 'qamarero-agents'}.json'\n\nconst project = parseProject(json)\nconst agent = project.agents.find(\n  a => a.id === '${config.value.id}'\n)!\n<\/script>\n\n<template>\n  <AgentAvatar\n    :config="agent"\n    state="${scene.value.state}"\n    :size="160"\n    :playing="true"\n  />\n</template>`)
 function numberPatch(key: keyof AgentConfig, event: Event) { patch({ [key]: Number((event.target as HTMLInputElement).value) }) }
-function downloadProject() { download(new Blob([JSON.stringify(project.value, null, 2)], { type: 'application/json' }), 'qamarero-agents.json'); notify('Proyecto JSON exportado con agentes y secuencia.') }
+function downloadProject() { download(new Blob([JSON.stringify(project.value, null, 2)], { type: 'application/json' }), collection.value === 'ingredients' ? 'qamarero-ingredients.json' : 'qamarero-agents.json'); notify('Proyecto JSON exportado con agentes y secuencia.') }
 async function copyCode() {
   try { await navigator.clipboard.writeText(integrationCode.value); notify('Código copiado.') }
   catch { notify('No se pudo acceder al portapapeles. Selecciona y copia el código.') }
@@ -56,6 +58,8 @@ function sceneDuration(index: number, event: Event) {
       <main class="studio-main">
         <div class="page-heading"><div><div class="eyebrow"><span></span>PERSONALIDAD, PÍXEL A PÍXEL</div><h1>{{ tab === 'integration' ? 'Listos para formar parte.' : 'El equipo cobra vida.' }}</h1><p>Diseña, combina y anima a los agentes de Qamarero.</p></div><button class="text-button import-project" @click="inputFile?.click()"><Icon name="upload" :size="16" />Importar proyecto</button><input ref="inputFile" class="visually-hidden" type="file" accept=".json,application/json" aria-label="Importar proyecto JSON" @change="event => { importFile((event.target as HTMLInputElement).files?.[0]); (event.target as HTMLInputElement).value = '' }" /></div>
 
+        <CollectionSwitcher :collection="collection" @select="switchCollection" />
+
         <div v-if="tab !== 'integration'" class="editor-layout">
           <section class="preview-panel" aria-label="Vista previa del agente">
             <div class="preview-toolbar"><div class="document-label"><span class="orange-dot"></span>{{ config.name }}<span class="document-tag">{{ team ? 'Equipo' : 'Agente' }}</span></div><div class="canvas-tools"><button :class="['icon-button', { active: grid }]" aria-label="Mostrar cuadrícula" :aria-pressed="grid" @click="grid = !grid"><Icon name="dotgrid" :size="17" /></button><button :class="['icon-button', { active: dark }]" aria-label="Cambiar fondo" :aria-pressed="dark" @click="dark = !dark"><Icon name="sun" :size="17" /></button><span class="tool-divider"></span><button :class="['icon-button', { active: team }]" aria-label="Ver todo el equipo" :aria-pressed="team" @click="team = !team"><Icon name="users" :size="17" /></button></div></div>
@@ -75,7 +79,7 @@ function sceneDuration(index: number, event: Event) {
               <div class="property-tabs"><button :class="{ active: propertyTab === 'appearance' }" @click="propertyTab = 'appearance'">Apariencia</button><button :class="{ active: propertyTab === 'accessories' }" @click="propertyTab = 'accessories'">Accesorios<span>{{ config.accessories.length }}</span></button></div>
               <div v-if="propertyTab === 'appearance'" class="property-content">
                 <label class="field-label" for="agent-name">Nombre del agente</label><input id="agent-name" class="text-input" :value="config.name" maxlength="40" @input="event => patch({ name: (event.target as HTMLInputElement).value })" @blur="() => { if (!config.name.trim()) patch({ name: 'Mi agente' }) }" />
-                <div class="field-label field-top">Forma del cuerpo<span>5 formas</span></div><div class="shape-picker"><button v-for="shape in BODY_SHAPES" :key="shape.id" :class="{ active: config.shape === shape.id }" :aria-label="shape.label" :aria-pressed="config.shape === shape.id" :title="shape.label" @click="patch({ shape: shape.id })"><span :class="['shape-glyph', shape.id]"></span></button></div>
+                <div class="field-label field-top">Forma del cuerpo<span>{{ shapes.length }} formas</span></div><div class="shape-picker"><button v-for="shape in shapes" :key="shape.id" :class="{ active: config.shape === shape.id }" :aria-label="shape.label" :aria-pressed="config.shape === shape.id" :title="shape.label" @click="patch({ shape: shape.id })"><span :class="['shape-glyph', shape.id]"></span></button></div>
                 <div class="field-label field-top">Color del cuerpo<label class="custom-color" title="Color personalizado del cuerpo">{{ config.bodyColor.toUpperCase() }}<input type="color" :value="config.bodyColor" aria-label="Color personalizado del cuerpo" @input="event => patch({ bodyColor: (event.target as HTMLInputElement).value })" /></label></div><div class="color-picker"><button v-for="color in bodyColors" :key="color" :style="{ background: color }" :class="{ active: config.bodyColor === color }" :aria-label="`Cuerpo ${color}`" :aria-pressed="config.bodyColor === color" @click="patch({ bodyColor: color })"><Icon v-if="config.bodyColor === color" name="check" :size="14" /></button></div>
                 <div class="field-label field-top">Color de acento<label class="custom-color" title="Color personalizado de acento">{{ config.accentColor.toUpperCase() }}<input type="color" :value="config.accentColor" aria-label="Color personalizado de acento" @input="event => patch({ accentColor: (event.target as HTMLInputElement).value })" /></label></div><div class="color-picker"><button v-for="color in accentColors" :key="color" :style="{ background: color }" :class="{ active: config.accentColor === color }" :aria-label="`Acento ${color}`" :aria-pressed="config.accentColor === color" @click="patch({ accentColor: color })"><Icon v-if="config.accentColor === color" name="check" :size="14" /></button></div>
                 <label class="field-label field-top" for="expression">Expresión de base</label><select id="expression" class="text-input" :value="config.expression" @change="event => patch({ expression: (event.target as HTMLSelectElement).value as AgentConfig['expression'] })"><option v-for="mood in MOODS" :key="mood.id" :value="mood.id">{{ mood.label }}</option></select>
@@ -98,6 +102,6 @@ function sceneDuration(index: number, event: Event) {
     </div>
     <div v-if="message" class="studio-toast" role="status"><Icon name="sparkles" :size="17" />{{ message }}<button class="icon-button" aria-label="Cerrar aviso" @click="message = ''"><Icon name="close" :size="14" /></button></div>
     <ExportDialog v-if="exporting" :config="config" :state="scene.state" :time="scene.time" :timeline="sequencing ? project.timeline : undefined" @close="exporting = false" @done="notify" />
-    <AgentPresentation v-if="presenting" embedded @close="presenting = false" />
+    <AgentPresentation v-if="presenting" embedded :collection="collection" @close="presenting = false" />
   </div>
 </template>

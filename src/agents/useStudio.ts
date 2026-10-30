@@ -1,14 +1,14 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { freshProject, parseProject, timelineAt, type Accessory, type AgentConfig, type Motion, type TimelineBlock } from './catalog'
-
-const STORAGE_KEY = 'qamarero-agent-studio-v1'
+import { freshProject, parseProject, timelineAt, type Accessory, type AgentConfig, type CollectionId, type Motion, type TimelineBlock } from './catalog'
+import { collectionFromSearch, collectionKey, readCollectionProject, writeCollectionProject } from './collectionStorage'
 
 export function useStudio() {
-  const initial = freshProject()
+  const collection = ref(collectionFromSearch(location.search))
+  watch(collection, value => { document.title = value === 'ingredients' ? 'Qamarero · Ingredientes' : 'Qamarero · Agent Studio' }, { immediate: true })
+  let initial = freshProject(collection.value)
   let loadError = ''
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) Object.assign(initial, parseProject(JSON.parse(stored)))
+    initial = readCollectionProject(localStorage, collection.value)
   } catch { loadError = 'No se pudo recuperar el proyecto guardado. Puedes importar una copia JSON.' }
   const project = ref(initial)
   const selected = ref(initial.agents[0]!.id)
@@ -30,7 +30,7 @@ export function useStudio() {
     clearTimeout(messageTimer)
     messageTimer = setTimeout(() => { message.value = '' }, 4500)
   }
-  watch(project, () => { dirty.value = true }, { deep: true })
+  watch(project, () => { dirty.value = true }, { deep: true, flush: 'sync' })
   watch(duration, value => { time.value = Math.min(time.value, Math.max(0, value - 0.001)) })
   const onMotion = () => { reduced.value = media?.matches ?? false; if (reduced.value) playing.value = false }
   function tick(now: number) {
@@ -53,10 +53,34 @@ export function useStudio() {
   }
   function save() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(project.value))
+      writeCollectionProject(localStorage, collection.value, project.value)
       dirty.value = false
       notify('Proyecto guardado en este navegador.')
     } catch { notify('El navegador no permite guardar. Exporta el proyecto como JSON.') }
+  }
+  function updateCollectionUrl() {
+    const url = new URL(location.href)
+    if (collection.value === 'ingredients') url.searchParams.set('coleccion', 'ingredientes')
+    else url.searchParams.delete('coleccion')
+    history.replaceState(null, '', url)
+  }
+  function preserveCurrentCollection() {
+    // Une vue sans changements ne doit pas ecraser une sauvegarde plus recente d'un autre onglet.
+    if (dirty.value || localStorage.getItem(collectionKey(collection.value)) === null) writeCollectionProject(localStorage, collection.value, project.value)
+  }
+  function switchCollection(next: CollectionId) {
+    if (next === collection.value) return
+    try {
+      preserveCurrentCollection()
+      const nextProject = readCollectionProject(localStorage, next)
+      collection.value = next
+      project.value = nextProject
+      selected.value = nextProject.agents[0]!.id
+      time.value = 0
+      dirty.value = false
+      updateCollectionUrl()
+      notify(next === 'ingredients' ? 'Colección Ingredientes. Tu equipo original está guardado.' : 'Colección Original. Se han recuperado tus personajes y ajustes.')
+    } catch { notify('No se pudo guardar la colección actual. Exporta el JSON antes de cambiar de colección.') }
   }
   function duplicate() {
     if (project.value.agents.length >= 30) return notify('Puedes crear hasta 30 agentes por proyecto.')
@@ -66,9 +90,9 @@ export function useStudio() {
     notify('Agente duplicado. Personalízalo a tu manera.')
   }
   function resetAgent() {
-    const original = freshProject().agents.find(a => a.id === selected.value)
+    const original = freshProject(collection.value).agents.find(a => a.id === selected.value)
     if (original) patch(original)
-    else patch({ ...freshProject().agents[0]!, id: config.value.id, name: config.value.name })
+    else patch({ ...freshProject(collection.value).agents[0]!, id: config.value.id, name: config.value.name })
     notify('Apariencia original restaurada.')
   }
   function setMotion(state: Motion) { motion.value = state; sequencing.value = false; time.value = 0 }
@@ -98,11 +122,17 @@ export function useStudio() {
     if (file.size > 1_000_000) return notify('El archivo JSON no puede superar 1 MB.')
     try {
       const validated = parseProject(JSON.parse(await file.text()))
+      const target = validated.collection ?? 'classic'
+      if (target !== collection.value) {
+        preserveCurrentCollection()
+        collection.value = target
+        updateCollectionUrl()
+      }
       project.value = validated
       selected.value = validated.agents[0]!.id
       time.value = 0
       notify('Proyecto importado. Guárdalo para conservarlo en este navegador.')
     } catch (error) { notify(error instanceof Error ? error.message : 'No se pudo importar el proyecto.') }
   }
-  return { project, selected, config, time, playing, sequencing, motion, duration, scene, dirty, message, reduced, notify, patch, toggleAccessory, save, duplicate, resetAgent, setMotion, addScene, updateScene, removeScene, moveScene, seekScene, importFile }
+  return { project, collection, switchCollection, selected, config, time, playing, sequencing, motion, duration, scene, dirty, message, reduced, notify, patch, toggleAccessory, save, duplicate, resetAgent, setMotion, addScene, updateScene, removeScene, moveScene, seekScene, importFile }
 }

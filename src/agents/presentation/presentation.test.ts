@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CAST, PRESENTATION, presentationAt } from './story'
+import { CAST, INGREDIENT_CAST, PRESENTATION, presentationAt } from './story'
 import { renderPresentationSvg } from './render'
 
 describe('team presentation', () => {
@@ -22,6 +22,19 @@ describe('team presentation', () => {
     expect(presentationAt(5.8)).toMatchObject({ kind: 'solo', index: 1 })
     expect(presentationAt(24.2)).toMatchObject({ kind: 'team', time: 0 })
     expect(presentationAt(100)).toEqual(presentationAt(30))
+  })
+  it('provides a separate ingredient introduction and keeps the original cast', () => {
+    for (let index = 0; index < INGREDIENT_CAST.length; index++) {
+      const time = PRESENTATION.intro + index * PRESENTATION.solo + 1
+      const original = renderPresentationSvg(time)
+      const ingredients = renderPresentationSvg(time, undefined, 'presentation', 'ingredients')
+      expect(original).toContain(`>${CAST[index]!.name}</text>`)
+      expect(ingredients).toContain(`>${INGREDIENT_CAST[index]!.name}</text>`)
+      expect(ingredients).not.toContain(`>${CAST[index]!.name}</text>`)
+    }
+    const ending = renderPresentationSvg(29, undefined, 'presentation', 'ingredients')
+    expect(ending.match(/data-member=/g)).toHaveLength(5)
+    for (const member of INGREDIENT_CAST) expect(ending).toContain(`>${member.name}</text>`)
   })
   it('is deterministic when seeking backwards and keeps the corrected glasses', () => {
     const before = renderPresentationSvg(17)

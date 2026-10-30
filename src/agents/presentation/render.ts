@@ -1,5 +1,6 @@
-import type { AgentConfig } from '../catalog'
+import type { AgentConfig, CollectionId } from '../catalog'
 import { renderAgentSvg } from '../render'
+import { INGREDIENT_BOUNDS, isIngredientShape } from '../ingredients'
 import { CAST, PRESENTATION, presentationAt, presentationCast } from './story'
 
 const PAPER = '#faf8f3'
@@ -22,16 +23,16 @@ function character(config: AgentConfig, x: number, y: number, size: number, time
 }
 
 /** Le meme dessin sert a la lecture, aux images de controle et au fichier video. */
-export function renderPresentationSvg(time: number, agents?: AgentConfig[], uid = 'presentation') {
+export function renderPresentationSvg(time: number, agents?: AgentConfig[], uid = 'presentation', collection: CollectionId = 'classic') {
   const scene = presentationAt(time)
-  const cast = presentationCast(agents)
+  const cast = presentationCast(agents, collection)
   let content = ''
   const brand = `<g transform="translate(116 76)"><text font-size="43" font-weight="700" fill="${ORANGE}">q</text>${text(38, 0, 'qamarero', 32, 700, INK, 'letter-spacing="-1.5"')}</g>${text(1804, 72, 'EL EQUIPO', 15, 600, MUTED, 'text-anchor="end" letter-spacing="3"')}`
 
   if (scene.kind === 'intro') {
     const incoming = ease(scene.time / 0.5)
     const outgoing = 1 - clamp((scene.time - 0.88) / 0.32)
-    content = `<g opacity="${n(incoming * outgoing)}" transform="translate(0 ${n((1 - incoming) * 30)})">${text(960, 438, 'Conoce a tu', 91, 700, INK, 'text-anchor="middle" letter-spacing="-4"')}${text(960, 547, 'nuevo equipo.', 111, 700, ORANGE, 'text-anchor="middle" letter-spacing="-5"')}${text(960, 641, 'Cinco agentes que cuidan de tu restaurante.', 30, 400, MUTED, 'text-anchor="middle"')}</g>`
+    content = `<g opacity="${n(incoming * outgoing)}" transform="translate(0 ${n((1 - incoming) * 30)})">${text(960, 438, collection === 'ingredients' ? 'Los ingredientes' : 'Conoce a tu', 91, 700, INK, 'text-anchor="middle" letter-spacing="-4"')}${text(960, 547, collection === 'ingredients' ? 'de un gran equipo.' : 'nuevo equipo.', 111, 700, ORANGE, 'text-anchor="middle" letter-spacing="-5"')}${text(960, 641, 'Cinco agentes que cuidan de tu restaurante.', 30, 400, MUTED, 'text-anchor="middle"')}</g>`
   }
 
   if (scene.kind === 'solo') {
@@ -65,12 +66,13 @@ export function renderPresentationSvg(time: number, agents?: AgentConfig[], uid 
 
   if (scene.kind === 'team') {
     const headlineIn = ease(scene.time / 0.7)
-    content = `<g opacity="${n(headlineIn)}" transform="translate(0 ${n((1 - headlineIn) * 25)})">${text(960, 222, 'Cinco agentes.', 76, 700, INK, 'text-anchor="middle" letter-spacing="-3"')}${text(960, 310, 'Un solo equipo.', 83, 700, ORANGE, 'text-anchor="middle" letter-spacing="-3"')}</g>`
+    content = `<g opacity="${n(headlineIn)}" transform="translate(0 ${n((1 - headlineIn) * 25)})">${text(960, 222, collection === 'ingredients' ? 'Cinco ingredientes.' : 'Cinco agentes.', 76, 700, INK, 'text-anchor="middle" letter-spacing="-3"')}${text(960, 310, collection === 'ingredients' ? 'Un gran equipo.' : 'Un solo equipo.', 83, 700, ORANGE, 'text-anchor="middle" letter-spacing="-3"')}</g>`
     content += cast.map((member, index) => {
       const incoming = ease((scene.time - 0.22 - index * 0.14) / 0.8)
       const x = 260 + index * 350
-      const y = 606 + (1 - incoming) * 175
       const size = 376 * (0.7 + 0.3 * incoming)
+      const baseline = collection === 'ingredients' && isIngredientShape(member.config.shape) ? 705 - INGREDIENT_BOUNDS[member.config.shape].bottom * size / 360 : 606
+      const y = baseline + (1 - incoming) * 175
       return `<g data-member="${member.id}" opacity="${n(incoming)}">${character(member.config, x, y, size, scene.time + index * 0.19, 'happy', `${uid}-team-${member.id}`)}<g opacity="${n(incoming)}">${text(x, 836 + (1 - incoming) * 30, member.name, 43, 700, INK, 'text-anchor="middle" letter-spacing="-1.5"')}${text(x, 883 + (1 - incoming) * 30, member.area, 23, 400, MUTED, 'text-anchor="middle"')}</g></g>`
     }).join('')
     const footerIn = ease((scene.time - 1.4) / 0.7)

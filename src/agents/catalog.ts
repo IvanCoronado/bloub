@@ -1,12 +1,23 @@
 import type { ExpressionId } from '@/bot/expressions'
 
-export const BODY_SHAPES = [
+export const CLASSIC_SHAPES = [
   { id: 'capsule', label: 'Cápsula' },
   { id: 'triangle', label: 'Triángulo' },
   { id: 'cloud', label: 'Nube' },
   { id: 'oval', label: 'Óvalo' },
   { id: 'square', label: 'Cuadrado' }
 ] as const
+
+export const INGREDIENT_SHAPES = [
+  { id: 'croquette', label: 'Croqueta' },
+  { id: 'shrimp', label: 'Gamba' },
+  { id: 'garlic', label: 'Ajo' },
+  { id: 'lemon', label: 'Limón' },
+  { id: 'tomato', label: 'Tomate' }
+] as const
+export const BODY_SHAPES = [...CLASSIC_SHAPES, ...INGREDIENT_SHAPES] as const
+export type IngredientShape = typeof INGREDIENT_SHAPES[number]['id']
+export type CollectionId = 'classic' | 'ingredients'
 
 export const ACCESSORIES = [
   { id: 'headset', label: 'Auriculares', icon: 'headphones' },
@@ -68,8 +79,18 @@ export const PRESETS: AgentConfig[] = [
   { ...base, id: 'compras', name: 'Compras', role: 'Todo en su punto', shape: 'square', accessories: ['chef'] }
 ]
 
+export const INGREDIENT_PRESETS: AgentConfig[] = [
+  { ...base, id: 'croqueta', name: 'Croqueta', role: 'Teléfono', shape: 'croquette', bodyColor: '#efa53a', accentColor: '#19262e', eyeColor: '#19262e', depth: 0.18, accessories: ['headset'] },
+  { ...base, id: 'gamba', name: 'Gamba', role: 'Marketing', shape: 'shrimp', bodyColor: '#ff6036', accentColor: '#19262e', eyeColor: '#19262e', depth: 0.1, accessories: ['megaphone'] },
+  { ...base, id: 'ajo', name: 'Ajo', role: 'Equipo', shape: 'garlic', bodyColor: '#fff4dc', accentColor: '#19262e', eyeColor: '#19262e', depth: 0.08, accessories: ['bowtie'] },
+  { ...base, id: 'limon', name: 'Limón', role: 'Carta', shape: 'lemon', bodyColor: '#ffd138', accentColor: '#19262e', eyeColor: '#19262e', depth: 0.14, accessories: ['glasses'] },
+  { ...base, id: 'tomate', name: 'Tomate', role: 'Compras', shape: 'tomato', bodyColor: '#ff5135', accentColor: '#19262e', eyeColor: '#19262e', depth: 0.1, accessories: ['chef'] }
+]
+
+export const presetsFor = (collection: CollectionId) => collection === 'ingredients' ? INGREDIENT_PRESETS : PRESETS
+
 export interface TimelineBlock { id: string; state: Motion; duration: number }
-export interface AgentProject { version: 1; agents: AgentConfig[]; timeline: TimelineBlock[] }
+export interface AgentProject { version: 1; collection?: CollectionId; agents: AgentConfig[]; timeline: TimelineBlock[] }
 export const DEFAULT_TIMELINE: TimelineBlock[] = [
   { id: 'intro', state: 'idle', duration: 2 },
   { id: 'listen', state: 'listening', duration: 3 },
@@ -77,8 +98,8 @@ export const DEFAULT_TIMELINE: TimelineBlock[] = [
   { id: 'done', state: 'happy', duration: 2 }
 ]
 
-export function freshProject(): AgentProject {
-  return structuredClone({ version: 1, agents: PRESETS, timeline: DEFAULT_TIMELINE })
+export function freshProject(collection: CollectionId = 'classic'): AgentProject {
+  return structuredClone({ version: 1, ...(collection === 'ingredients' ? { collection } : {}), agents: presetsFor(collection), timeline: DEFAULT_TIMELINE })
 }
 
 const color = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)
@@ -89,6 +110,7 @@ const text = (v: unknown, max: number): v is string => typeof v === 'string' && 
 export function parseProject(input: unknown): AgentProject {
   if (!input || typeof input !== 'object') throw new Error('El archivo no contiene un proyecto válido.')
   const p = input as Partial<AgentProject>
+  if (p.collection !== undefined && p.collection !== 'classic' && p.collection !== 'ingredients') throw new Error('La colección del proyecto no es válida.')
   if (p.version !== 1 || !Array.isArray(p.agents) || p.agents.length < 1 || p.agents.length > 30 || !Array.isArray(p.timeline) || !p.timeline.length || p.timeline.length > 24) {
     throw new Error('Usa un proyecto de agentes versión 1, con 1–30 agentes y 1–24 escenas.')
   }

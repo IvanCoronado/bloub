@@ -14,6 +14,8 @@ pnpm build
 pnpm generate:agents  # rebuild public/agents
 ```
 
+[Ingredients collection](docs/ingredients.md) · [Ingredients presentation](public/presentations/equipo-qamarero-ingredientes.mp4). The original collection and presentation are preserved.
+
 [30-second team presentation](public/presentations/equipo-qamarero.mp4) · [Presentation source and storyboard](docs/presentation.md).
 
 [Integration guide](docs/qamarero-studio.md) · [Verification](docs/qa-agent-studio.md) · [Ready-to-use assets](public/agents).

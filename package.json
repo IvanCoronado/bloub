@@ -25,7 +25,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "generate:agents": "node tools/generate-agents.mjs",
-    "render:presentation": "node tools/render-presentation.mjs"
+    "render:presentation": "node tools/render-presentation.mjs",
+    "generate:ingredients": "node tools/generate-agents.mjs --ingredients",
+    "render:presentation:ingredients": "node tools/render-presentation.mjs --ingredients"
   },
   "dependencies": {
     "mediabunny": "^1.54.0",

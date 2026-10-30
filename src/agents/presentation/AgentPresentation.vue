@@ -2,15 +2,18 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import Icon from '../StudioIcon.vue'
 import { renderPresentationSvg } from './render'
-import { CAST, PRESENTATION, presentationAt } from './story'
+import type { CollectionId } from '../catalog'
+import { castFor, PRESENTATION, presentationAt } from './story'
 
-const props = withDefaults(defineProps<{ embedded?: boolean }>(), { embedded: false })
+const props = withDefaults(defineProps<{ embedded?: boolean; collection?: CollectionId }>(), { embedded: false, collection: 'classic' })
 const emit = defineEmits<{ close: [] }>()
 const dialog = ref<HTMLDialogElement>()
 const time = ref(0)
 const playing = ref(true)
 const scene = computed(() => presentationAt(time.value))
-const markup = computed(() => renderPresentationSvg(time.value))
+const cast = computed(() => castFor(props.collection))
+const markup = computed(() => renderPresentationSvg(time.value, undefined, 'presentation', props.collection))
+const videoStem = computed(() => props.collection === 'ingredients' ? 'equipo-qamarero-ingredientes' : 'equipo-qamarero')
 const formatTime = (value: number) => `0:${Math.floor(value).toString().padStart(2, '0')}`
 let raf = 0, last = 0
 let media: MediaQueryList | undefined
@@ -45,10 +48,10 @@ onBeforeUnmount(() => { cancelAnimationFrame(raf); media?.removeEventListener('c
 
 <template>
   <dialog ref="dialog" class="presentation-shell" aria-label="Presentación del equipo de Qamarero" @cancel.prevent="close">
-    <header class="presentation-header"><div><Icon name="film" :size="19" /><strong>El equipo de Qamarero</strong><span>Presentación</span></div><button class="icon-button" aria-label="Cerrar presentación" @click="close"><Icon name="close" :size="21" /></button></header>
+    <header class="presentation-header"><div><Icon name="film" :size="19" /><strong>El equipo de Qamarero</strong><span>{{ collection === 'ingredients' ? 'Ingredientes' : 'Presentación' }}</span></div><button class="icon-button" aria-label="Cerrar presentación" @click="close"><Icon name="close" :size="21" /></button></header>
     <div class="presentation-stage" v-html="markup" />
-    <div class="presentation-navigation"><button :class="{ active: scene.kind === 'intro' }" @click="seek(0.65)">Inicio</button><button v-for="(member, index) in CAST" :key="member.id" :class="{ active: scene.kind === 'solo' && scene.index === index }" @click="seek(PRESENTATION.intro + index * PRESENTATION.solo + 1)">{{ member.name }}</button><button :class="{ active: scene.kind === 'team' }" @click="seek(PRESENTATION.teamStart + 2)"><Icon name="users" :size="14" />Todos juntos</button></div>
-    <footer class="presentation-controls"><button class="presentation-play" :aria-label="playing ? 'Pausar presentación' : 'Reproducir presentación'" @click="toggle"><Icon :name="playing ? 'pause' : 'play'" :size="19" /></button><button class="icon-button" aria-label="Reiniciar presentación" @click="time = 0; playing = true"><Icon name="reset" :size="17" /></button><span class="presentation-time">{{ formatTime(time) }} <small>/ 0:30</small></span><input type="range" min="0" :max="PRESENTATION.duration" step="0.01" :value="time" aria-label="Posición de la presentación" @input="event => seek(Number((event.target as HTMLInputElement).value))" /><a class="button primary" href="/presentations/equipo-qamarero.mp4" download="El-equipo-de-Qamarero.mp4"><Icon name="download" :size="16" />Descargar MP4</a></footer>
+    <div class="presentation-navigation"><button :class="{ active: scene.kind === 'intro' }" @click="seek(0.65)">Inicio</button><button v-for="(member, index) in cast" :key="member.id" :class="{ active: scene.kind === 'solo' && scene.index === index }" @click="seek(PRESENTATION.intro + index * PRESENTATION.solo + 1)">{{ member.name }}</button><button :class="{ active: scene.kind === 'team' }" @click="seek(PRESENTATION.teamStart + 2)"><Icon name="users" :size="14" />Todos juntos</button></div>
+    <footer class="presentation-controls"><button class="presentation-play" :aria-label="playing ? 'Pausar presentación' : 'Reproducir presentación'" @click="toggle"><Icon :name="playing ? 'pause' : 'play'" :size="19" /></button><button class="icon-button" aria-label="Reiniciar presentación" @click="time = 0; playing = true"><Icon name="reset" :size="17" /></button><span class="presentation-time">{{ formatTime(time) }} <small>/ 0:30</small></span><input type="range" min="0" :max="PRESENTATION.duration" step="0.01" :value="time" aria-label="Posición de la presentación" @input="event => seek(Number((event.target as HTMLInputElement).value))" /><a class="button primary" :href="`/presentations/${videoStem}.mp4`" :download="`${videoStem}.mp4`"><Icon name="download" :size="16" />Descargar MP4</a></footer>
   </dialog>
 </template>
 

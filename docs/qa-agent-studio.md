@@ -3,7 +3,7 @@
 Comprobado el 30 de octubre de 2026 con Node 22.13, pnpm 11.17 y Chromium.
 
 - Instalación con lockfile: correcta, sin dependencias nuevas.
-- `pnpm test`: 16 archivos y 222 pruebas correctas, incluidas las originales.
+- `pnpm test`: 19 archivos y 235 pruebas correctas, incluidas las originales.
 - `pnpm build`: comprobación de tipos y compilación de producción correctas.
 - Generación de recursos: cinco SVG fijos, cinco animados, proyecto JSON y lámina del equipo.
 
@@ -28,4 +28,8 @@ La comprobación del codificador corresponde a Chromium con AVC/WebCodecs dispon
 
 ## Corrección de las gafas
 
-Las dos lentes comparten una montura circular y un puente, con separación mínima entre los aros. La apertura de los párpados no modifica la montura. Se comprobó la separación en los seis estados, tanto con ojos abiertos como durante el parpadeo; los tres nuevos tests cubren tamaños de accesorio, rigidez y alineación del puente. Compilación y 222 pruebas correctas en el checkout final. [Vista de Carta corregida](carta-glasses.png).
+Las dos lentes comparten una montura circular y un puente, con separación mínima entre los aros. La apertura de los párpados no modifica la montura. Se comprobó la separación en los seis estados, tanto con ojos abiertos como durante el parpadeo; los tres nuevos tests cubren tamaños de accesorio, rigidez y alineación del puente. Compilación correcta; la suite actual se indica al principio de este documento. [Vista de Carta corregida](carta-glasses.png).
+
+## Colección Ingredientes
+
+Se conserva la colección anterior y se añade una variante independiente. Se han verificado los proyectos antiguos, los cambios pendientes al alternar, el fallo de cuota de almacenamiento y una copia más reciente guardada desde otra pestaña. El vídeo y los SVG originales mantienen sus hashes. Véase [la comprobación de Ingredientes](ingredients.md).

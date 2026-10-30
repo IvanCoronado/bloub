@@ -1,4 +1,4 @@
-import { PRESETS, type AgentConfig, type Motion } from '../catalog'
+import { INGREDIENT_PRESETS, presetsFor, type AgentConfig, type CollectionId, type Motion } from '../catalog'
 
 export const PRESENTATION = { width: 1920, height: 1080, fps: 30, duration: 30, intro: 1.2, solo: 4.6, teamStart: 24.2 } as const
 
@@ -30,6 +30,9 @@ export const CAST: { id: string; name: string; area: string; role: string; descr
   }
 ]
 
+export const INGREDIENT_CAST = CAST.map((member, index) => ({ ...member, id: INGREDIENT_PRESETS[index]!.id, name: INGREDIENT_PRESETS[index]!.name }))
+export const castFor = (collection: CollectionId) => collection === 'ingredients' ? INGREDIENT_CAST : CAST
+
 export function presentationAt(time: number) {
   const t = Math.max(0, Math.min(PRESENTATION.duration, Number.isFinite(time) ? time : 0))
   if (t < PRESENTATION.intro) return { kind: 'intro' as const, time: t, index: -1 }
@@ -38,11 +41,13 @@ export function presentationAt(time: number) {
   return { kind: 'solo' as const, index, time: t - PRESENTATION.intro - index * PRESENTATION.solo }
 }
 
-export function presentationCast(agents: AgentConfig[] = PRESETS) {
-  return CAST.map(member => ({
+export function presentationCast(agents?: AgentConfig[], collection: CollectionId = 'classic') {
+  const presets = presetsFor(collection)
+  const source = agents ?? presets
+  return castFor(collection).map(member => ({
     ...member,
     config: {
-      ...(agents.find(agent => agent.id === member.id) ?? PRESETS.find(agent => agent.id === member.id)!),
+      ...(source.find(agent => agent.id === member.id) ?? presets.find(agent => agent.id === member.id)!),
       name: member.name,
       role: member.role
     }

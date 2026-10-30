@@ -28,7 +28,7 @@ const state = ref<Motion>('listening')
 
 Props: `config: AgentConfig`, `state: Motion`, `size`, `playing` y `time`. Con `time`, el padre controla cada fotograma. Sin `time`, el componente usa su propio reloj. Para composiciones personalizadas, exporta el JSON, valídalo con `parseProject` y pasa el agente al componente. El ejemplo de la pestaña Integración importa ese JSON para conservar las ediciones.
 
-Para otro repositorio Vue, copia `AgentAvatar.vue`, `catalog.ts`, `render.ts`, `glasses.ts` y la carpeta `src/bot/`; configura `@` para apuntar a `src`. Los SVG exportados se pueden usar directamente como imágenes, sin copiar código del motor.
+Para otro repositorio Vue, copia `AgentAvatar.vue`, `catalog.ts`, `render.ts`, `glasses.ts`, `ingredients.ts` y la carpeta `src/bot/`; configura `@` para apuntar a `src`. Los SVG exportados se pueden usar directamente como imágenes, sin copiar código del motor.
 
 ```ts
 import { parseProject } from './agents/catalog'
@@ -59,3 +59,7 @@ El SVG animado conserva el estado seleccionado; para varios estados usa GIF o MP
 El editor original permanece en `/#original`: recarga la página si ya estabas en el estudio, porque la selección se hace al arrancar. Sus constantes medidas y pruebas no se han modificado. Se conservan la licencia MIT y los créditos de Jérémy Perret.
 
 `pnpm test` ejecuta las pruebas originales y las de validación, límites de secuencia, combinaciones, determinismo, escape de texto y SVG animado. `pnpm build` comprueba tipos y genera producción. `pnpm generate:agents` reconstruye los archivos de `public/agents/`.
+
+## Colecciones
+
+«Original» y «Ingredientes» conservan proyectos y recursos separados. Consulta [la guía de Ingredientes](ingredients.md) para los nuevos personajes, accesos directos y comandos. Los JSON anteriores siguen siendo válidos.
