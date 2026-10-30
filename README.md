@@ -1,3 +1,27 @@
+# Qamarero Agent Studio
+
+A visual character composer for Qamarero, adapted from [Jérémy Perret’s bloub](https://github.com/jeremy-prt/bloub).
+
+Five editable SVG characters: **QPhone, Marketing, Equipo, Carta, Compras**. Combine accessories, body shapes, expressions, colors and shading; animate six states; build a timeline; save/import projects; export SVG, animated SVG, PNG, GIF and MP4. Spanish interface, responsive layouts and reduced-motion support.
+
+![Qamarero Agent Studio](docs/studio-desktop.png)
+
+```sh
+pnpm install
+pnpm dev              # http://localhost:5190
+pnpm test
+pnpm build
+pnpm generate:agents  # rebuild public/agents
+```
+
+[Integration guide](docs/qamarero-studio.md) · [Verification](docs/qa-agent-studio.md) · [Ready-to-use assets](public/agents).
+
+The characters are visual components: your application supplies agent behavior and state changes. The original editor remains at `/#original` after reloading that URL. Upstream code, measurements and MIT attribution are preserved.
+
+---
+
+## Upstream README
+
 # bloub
 
 An SVG recreation of the x.ai bot avatar: **one filled black shape** that morphs
