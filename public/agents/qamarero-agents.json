@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "bodyColor": "#111112",
+      "accentColor": "#ff5d22",
+      "eyeColor": "#ffffff",
+      "expression": "neutre",
+      "accessoryScale": 1,
+      "depth": 0.25,
+      "tilt": 0,
+      "intensity": 0.65,
+      "speed": 1,
+      "shadow": true,
+      "id": "qphone",
+      "name": "QPhone",
+      "role": "Siempre al otro lado",
+      "shape": "capsule",
+      "accessories": [
+        "headset"
+      ]
+    },
+    {
+      "bodyColor": "#111112",
+      "accentColor": "#ff5d22",
+      "eyeColor": "#ffffff",
+      "expression": "neutre",
+      "accessoryScale": 1,
+      "depth": 0.25,
+      "tilt": 0,
+      "intensity": 0.65,
+      "speed": 1,
+      "shadow": true,
+      "id": "marketing",
+      "name": "Marketing",
+      "role": "Ideas que se hacen oír",
+      "shape": "triangle",
+      "accessories": [
+        "megaphone"
+      ]
+    },
+    {
+      "bodyColor": "#111112",
+      "accentColor": "#ff5d22",
+      "eyeColor": "#ffffff",
+      "expression": "neutre",
+      "accessoryScale": 1,
+      "depth": 0.25,
+      "tilt": 0,
+      "intensity": 0.65,
+      "speed": 1,
+      "shadow": true,
+      "id": "equipo",
+      "name": "Equipo",
+      "role": "El talento de tu restaurante",
+      "shape": "cloud",
+      "accessories": [
+        "bowtie"
+      ]
+    },
+    {
+      "bodyColor": "#111112",
+      "accentColor": "#ff5d22",
+      "eyeColor": "#ffffff",
+      "expression": "neutre",
+      "accessoryScale": 1,
+      "depth": 0.25,
+      "tilt": 0,
+      "intensity": 0.65,
+      "speed": 1,
+      "shadow": true,
+      "id": "carta",
+      "name": "Carta",
+      "role": "Cada detalle cuenta",
+      "shape": "oval",
+      "accessories": [
+        "glasses"
+      ]
+    },
+    {
+      "bodyColor": "#111112",
+      "accentColor": "#ff5d22",
+      "eyeColor": "#ffffff",
+      "expression": "neutre",
+      "accessoryScale": 1,
+      "depth": 0.25,
+      "tilt": 0,
+      "intensity": 0.65,
+      "speed": 1,
+      "shadow": true,
+      "id": "compras",
+      "name": "Compras",
+      "role": "Todo en su punto",
+      "shape": "square",
+      "accessories": [
+        "chef"
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "id": "intro",
+      "state": "idle",
+      "duration": 2
+    },
+    {
+      "id": "listen",
+      "state": "listening",
+      "duration": 3
+    },
+    {
+      "id": "think",
+      "state": "thinking",
+      "duration": 3
+    },
+    {
+      "id": "done",
+      "state": "happy",
+      "duration": 2
+    }
+  ]
+}

@@ -1,14 +1,14 @@
 {
-  "name": "bloub",
+  "name": "qamarero-agent-studio",
   "private": true,
   "version": "0.1.1",
   "type": "module",
-  "description": "SVG recreation of the x.ai bot avatar. One shape morphing through 14 states, measured off the reference video frame by frame.",
+  "description": "Composable, animated SVG characters for the Qamarero team. Fork of bloub.",
   "license": "MIT",
-  "author": "Jérémy Perret",
+  "author": "J\u00e9r\u00e9my Perret",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jeremy-prt/bloub.git"
+    "url": "git+https://github.com/IvanCoronado/bloub.git"
   },
   "keywords": [
     "svg",
@@ -23,7 +23,11 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "generate:agents": "node tools/generate-agents.mjs",
+    "render:presentation": "node tools/render-presentation.mjs",
+    "generate:ingredients": "node tools/generate-agents.mjs --ingredients",
+    "render:presentation:ingredients": "node tools/render-presentation.mjs --ingredients"
   },
   "dependencies": {
     "mediabunny": "^1.54.0",
@@ -34,6 +38,7 @@
     "@types/node": "^26.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "happy-dom": "^20.11.2",
+    "sharp": "0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vite": "^8.2.1",
